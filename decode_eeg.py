@@ -693,29 +693,32 @@ class ERP:
 
         return xdata
 
-    def plot_ss(self, xdata_all, ydata_all, subtitle = '',
-                electrode_subset=None, electrode_idx = None,
+    def plot_conditions(self, xdata_all, ydata_all, conditions=None,
+                subtitle = '', electrode_subset=None, electrode_idx = None,
                 savefig=False):
         
-        ss_data = np.zeros((self.exp.nsub,len(np.unique(ydata_all[0])),len(self.info['times'])))
+        if conditions is None:
+            conditions = np.unique(ydata_all[0])
+
+        c_data = np.zeros((self.exp.nsub,len(conditions),len(self.info['times'])))
         for isub in range(self.exp.nsub):
             xdata = xdata_all[isub]
             ydata = ydata_all[isub]
-            for iss,ss in enumerate(np.unique(ydata_all[0])):
-                ss_idx = ydata == ss
-                data = np.mean(xdata[ss_idx],0)
-                ss_data[isub,iss] = np.mean(self._select_electrodes(data,electrode_subset,electrode_idx),0)
-        return ss_data
+            for ic,c in enumerate(conditions):
+                c_idx = ydata == c
+                data = np.mean(xdata[c_idx],0)
+                c_data[isub,ic] = np.mean(self._select_electrodes(data,electrode_subset,electrode_idx),0)
+        return c_data
                 
         ax = plt.subplot(111)
 
         upper,lower=0,0
-        for iss,ss in enumerate(np.unique(ydata_all[0])):
-            x = np.mean(ss_data[:,iss],0)
-            se = np.std(ss_data[:,iss],0)/np.sqrt(self.exp.nsub)
+        for ic,c_data in enumerate(conditions):
+            x = np.mean(c_data[:,ic],0)
+            se = np.std(c_data[:,ic],0)/np.sqrt(self.exp.nsub)
             
             # ERP
-            plt.plot(self.info['times'],x, label=f'{ss}',linewidth=2.5,alpha=0.8)
+            plt.plot(self.info['times'],x, label=f'{c}',linewidth=2.5,alpha=0.8)
             # SE
             plt.fill_between(self.info['times'],x-se,x+se,alpha=.3)
 
@@ -727,17 +730,15 @@ class ERP:
         # Grey stim bar
         plt.fill_between([0,150],[lower-1,lower-1],[upper+.45,upper+.45],color='gray',alpha=.5,zorder=0)
         
-        # Hide the right and top spines]
+        # Hide the right and top axes
         ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False)
-
-        # Only show ticks on the left and bottom spines
         ax.yaxis.set_ticks_position('left')
         ax.xaxis.set_ticks_position('bottom')
 
         # Cleaning up plot
         plt.gca().invert_yaxis()
-        plt.legend(title = 'Set Size', loc='lower right')
+        plt.legend(title = 'Condition', loc='lower right')
         plt.xlabel('Time from Array Onset (ms)')
         plt.ylabel("Amplitude (microvolts)")
 
