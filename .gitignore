@@ -2,3 +2,4 @@
 *.mat
 
 .pyc
+__pycache__/decode_eeg.cpython-38.pyc
