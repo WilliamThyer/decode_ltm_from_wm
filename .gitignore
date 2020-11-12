@@ -1,2 +1,4 @@
 #data files
 *.mat
+
+.pyc
