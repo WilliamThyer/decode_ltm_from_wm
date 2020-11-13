@@ -685,8 +685,8 @@ class ERP:
         
         if electrode_subset is not None:
             # Create index for electrodes to include in plot
-            electrode_labels = [el for n, el in enumerate(self.info['chan_labels']) if el.startswith(electrode_subset)]
-            electrode_idx = np.in1d(self.info['chan_labels'],electrode_labels)
+            electrode_labels = [el for n, el in enumerate(self.info['electrode_labels']) if el.startswith(electrode_subset)]
+            electrode_idx = np.in1d(self.info['electrode_labels'],electrode_labels)
             xdata = xdata[electrode_idx]
         elif electrode_idx is not None:
             xdata = xdata[electrode_idx]
@@ -708,12 +708,10 @@ class ERP:
                 c_idx = ydata == c
                 data = np.mean(xdata[c_idx],0)
                 c_data[isub,ic] = np.mean(self._select_electrodes(data,electrode_subset,electrode_idx),0)
-        return c_data
-                
         ax = plt.subplot(111)
 
         upper,lower=0,0
-        for ic,c_data in enumerate(conditions):
+        for ic,c in enumerate(conditions):
             x = np.mean(c_data[:,ic],0)
             se = np.std(c_data[:,ic],0)/np.sqrt(self.exp.nsub)
             
@@ -723,7 +721,6 @@ class ERP:
             plt.fill_between(self.info['times'],x-se,x+se,alpha=.3)
 
             maxi,mini =  max(x) + max(se),min(x) - min(se)
-            print(maxi)
             if maxi > upper: upper = maxi
             if mini < lower: lower = mini
 
