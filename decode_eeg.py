@@ -283,7 +283,7 @@ class Classification:
         if classifier:
             self.classifier = classifier
         else:
-            self.classifier = LogisticRegression
+            self.classifier = LogisticRegression()
         self.scaler = StandardScaler()
 
         self.acc = np.zeros((self.nsub,np.size(self.t),self.n_splits))*np.nan
@@ -444,7 +444,7 @@ class Interpreter:
                 plt.savefig(output,bbox_inches='tight',dpi = 1000,format=file[1:])
                 print(f'Saving {output}')
 
-    def plot_acc(self, subtitle='', significance_testing = False, stim_time = [0,250],
+    def plot_acc(self, subtitle='', significance_testing = False, stim_time = [0,150],
                  savefig=False, title = False, ylim = [.18,.55],chance_text_y = .17):
 
         acc = np.mean(self.acc,2)
@@ -492,7 +492,7 @@ class Interpreter:
         ax.yaxis.set_ticks(np.arange(.1,1.1,.1))
         plt.setp(ax.get_xticklabels(), fontsize=14)
         plt.setp(ax.get_yticklabels(), fontsize=14)
-        plt.xlim(-200,1250)
+        plt.xlim(-200,850)
         plt.ylim(ylim)
 
         # labelling
@@ -500,7 +500,7 @@ class Interpreter:
         plt.ylabel('Accuracy', fontsize=14)
         ax.text(0.85, chance_text_y, 'Chance', transform=ax.transAxes, fontsize=14,
                 verticalalignment='top', color='grey')
-        ax.text(0.188, .98, 'Stim', transform=ax.transAxes, fontsize=14,
+        ax.text(0.22, .98, 'Stim', transform=ax.transAxes, fontsize=14,
                 verticalalignment='top', color='white')
         
         self.savefig('acc'+subtitle,save=savefig)
