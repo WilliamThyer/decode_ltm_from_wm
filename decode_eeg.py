@@ -36,23 +36,27 @@ class Experiment:
 
         self.info = self.load_info(0)
         self.info['times'] = self.info[f'{regex}_times']
+        self.info['original_times'] = self.info['times']
         self.time_idx = None
     
-    def load_eeg(self,isub,xdata_var_name = 'xdata', ydata_var_name = 'ydata'):
+    def load_eeg(self,isub,xdata_var_name = 'xdata', ydata_var_name = 'ydata', start_epoch=None,end_epoch=None):
         subj_mat = sio.loadmat(self.xdata_files[isub],variable_names=[xdata_var_name])
         xdata = np.moveaxis(subj_mat[xdata_var_name],[0,1,2],[1,2,0])
 
         subj_mat = sio.loadmat(self.ydata_files[isub],variable_names=[ydata_var_name])
         ydata = np.squeeze(subj_mat[ydata_var_name])
-
-        xdata = self.trim_epochs(xdata,-200,1000) #hardcoded
+        
+        if start_epoch is None: start_epoch=self.info['original_times'][0]
+        if end_epoch is None: end_epoch=self.info['original_times'][-1]
+        
+        xdata = self.trim_epochs(xdata,start_epoch,end_epoch) 
 
         return xdata, ydata
     
     def trim_epochs(self,xdata,start,end):
-        if not np.any(self.time_idx):
-            self.time_idx = (self.info['times']>start) & (self.info['times']<end)
-            self.info['times'] = self.info['times'][self.time_idx]
+        
+        self.time_idx = (self.info['original_times']>=start) & (self.info['original_times']<=end)
+        self.info['times'] = self.info['original_times'][self.time_idx]
 
         return xdata[:,:,self.time_idx]
 
@@ -492,7 +496,7 @@ class Interpreter:
         ax.yaxis.set_ticks(np.arange(.1,1.1,.1))
         plt.setp(ax.get_xticklabels(), fontsize=14)
         plt.setp(ax.get_yticklabels(), fontsize=14)
-        plt.xlim(-200,850)
+        plt.xlim(-200,1000)
         plt.ylim(ylim)
 
         # labelling
@@ -673,12 +677,18 @@ class ERP:
             plt.savefig(output,bbox_inches='tight',dpi = 1000,format=file_format[1:])
             print(f'Saving {output}')
 
-    def load_all_eeg(self,xdata_var_name='xdata',ydata_var_name='ydata'):
+    def load_all_eeg(self,xdata_var_name='xdata',ydata_var_name='ydata',start_epoch=None,end_epoch=None):
         
         xdata_all = np.empty((self.exp.nsub),dtype='object')
         ydata_all = np.empty((self.exp.nsub),dtype='object')
         for isub in range(self.exp.nsub):
-            xdata_all[isub], ydata_all[isub] = self.exp.load_eeg(isub,xdata_var_name=xdata_var_name,ydata_var_name=ydata_var_name)
+            xdata_all[isub], ydata_all[isub] = self.exp.load_eeg(
+                                                                 isub=isub,
+                                                                 xdata_var_name=xdata_var_name,
+                                                                 ydata_var_name=ydata_var_name,
+                                                                 start_epoch=start_epoch,
+                                                                 end_epoch=end_epoch
+                                                                )
         return xdata_all, ydata_all
 
     def _select_electrodes(self, xdata, electrode_subset = None, electrode_idx = None):
