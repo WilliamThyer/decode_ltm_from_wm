@@ -49,16 +49,17 @@ class Experiment:
         if start_epoch is None: start_epoch=self.info['original_times'][0]
         if end_epoch is None: end_epoch=self.info['original_times'][-1]
         
-        xdata = self.trim_epochs(xdata,start_epoch,end_epoch) 
+        xdata = self.trim_epochs(start_epoch,end_epoch,xdata) 
 
         return xdata, ydata
     
-    def trim_epochs(self,xdata,start,end):
+    def trim_epochs(self,start,end,xdata=None):
         
         self.time_idx = (self.info['original_times']>=start) & (self.info['original_times']<=end)
         self.info['times'] = self.info['original_times'][self.time_idx]
 
-        return xdata[:,:,self.time_idx]
+        if xdata is not None:
+            return xdata[:,:,self.time_idx]
 
     def load_artifact_idx(self, isub):
         """
@@ -233,7 +234,7 @@ class Wrangler:
                 yield X_train_all, X_test_all, y_train, y_test
             self.ifold += 1
     
-    def roll_over_time(self, X_train_all, X_test_all):
+    def roll_over_time(self, X_train_all, X_test_all=None):
         """
         returns one timepoint of EEG trial at a time
         """
@@ -242,9 +243,11 @@ class Wrangler:
 
             # Data for this time bin
             X_train = np.mean(X_train_all[...,time_window_idx],2)
-            X_test = np.mean(X_test_all[...,time_window_idx],2)
-
-            yield X_train, X_test
+            if X_test_all is not None:
+                X_test = np.mean(X_test_all[...,time_window_idx],2)
+                yield X_train, X_test
+            else:
+                yield X_train
     
     def roll_over_time_temp_gen(self,X_train_all, X_test_all):
 
