@@ -703,7 +703,7 @@ class ERP:
 
         return xdata
 
-    def plot_conditions(self, xdata_all, ydata_all, conditions=None,
+    def plot_conditions(self, xdata_all, ydata_all, conditions=None, ylim = [.18,.55],
                 subtitle = '', electrode_subset=None, electrode_idx = None,
                 savefig=False):
         
@@ -720,22 +720,22 @@ class ERP:
                 c_data[isub,ic] = np.mean(self._select_electrodes(data,electrode_subset,electrode_idx),0)
         ax = plt.subplot(111)
 
-        upper,lower=0,0
         for ic,c in enumerate(conditions):
             x = np.mean(c_data[:,ic],0)
             se = np.std(c_data[:,ic],0)/np.sqrt(self.exp.nsub)
-            
             # ERP
             plt.plot(self.info['times'],x, label=f'{c}',linewidth=2.5,alpha=0.8)
             # SE
             plt.fill_between(self.info['times'],x-se,x+se,alpha=.3)
-
+            
             maxi,mini =  max(x) + max(se),min(x) - min(se)
+            if ic == 0: 
+                upper,lower =  max(x) + max(se),min(x) - min(se)
             if maxi > upper: upper = maxi
             if mini < lower: lower = mini
 
         # Grey stim bar
-        plt.fill_between([0,150],[lower-1,lower-1],[upper+.45,upper+.45],color='gray',alpha=.5,zorder=0)
+        plt.fill_between([0,150],[lower,lower],[upper+.45,upper+.45],color='gray',alpha=.5,zorder=0)
         
         # Hide the right and top axes
         ax.spines['right'].set_visible(False)
@@ -744,8 +744,8 @@ class ERP:
         ax.xaxis.set_ticks_position('bottom')
 
         # Cleaning up plot
-        plt.gca().invert_yaxis()
-        plt.legend(title = 'Condition', loc='lower right')
+        # plt.gca().invert_yaxis()
+        plt.legend(title = 'Condition')
         plt.xlabel('Time from Array Onset (ms)')
         plt.ylabel("Amplitude (microvolts)")
 
