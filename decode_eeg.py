@@ -499,7 +499,7 @@ class Interpreter:
         ax.yaxis.set_ticks(np.arange(.1,1.1,.1))
         plt.setp(ax.get_xticklabels(), fontsize=14)
         plt.setp(ax.get_yticklabels(), fontsize=14)
-        plt.xlim(-200,1000)
+        plt.xlim(-200,max(self.t))
         plt.ylim(ylim)
 
         # labelling
