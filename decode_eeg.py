@@ -126,6 +126,8 @@ class Wrangler:
         self.cross_val = StratifiedShuffleSplit(n_splits=self.n_splits)
 
         self.t = samples[0:samples.shape[0]-int(time_window/self.sample_step)+1:int(time_step/self.sample_step)]
+        self.t = samples[0:samples.shape[0]-int(time_window/self.sample_step):int(time_step/self.sample_step)]
+
         
     def select_labels(self, xdata, ydata, return_idx = True):
         """
@@ -673,7 +675,7 @@ class ERP:
         else:
             self.fig_dir = Path('output/figures')
 
-    def savefig(self, subtitle = '', file_format = '.pdf', save = True):
+    def savefig(self, subtitle = '', file_format = '.png', save = True):
         if save:
             filename = self.subtitle + subtitle + self.timestr + file_format
             output = self.fig_dir / filename
