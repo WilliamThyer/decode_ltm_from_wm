@@ -126,7 +126,7 @@ class Wrangler:
         self.cross_val = StratifiedShuffleSplit(n_splits=self.n_splits)
 
         self.t = samples[0:samples.shape[0]-int(time_window/self.sample_step)+1:int(time_step/self.sample_step)]
-        self.t = samples[0:samples.shape[0]-int(time_window/self.sample_step):int(time_step/self.sample_step)]
+        # self.t = samples[0:samples.shape[0]-int(time_window/self.sample_step):int(time_step/self.sample_step)]
 
         
     def select_labels(self, xdata, ydata, return_idx = True):
@@ -397,7 +397,7 @@ class Interpreter:
         self.conf_mat = clfr.conf_mat
 
         import matplotlib
-        # Say, "the default sans-serif font is COMIC SANS"
+        # Say, "the default sans-serif font is arial"
         matplotlib.rcParams['font.sans-serif'] = "Arial"
         # Then, "ALWAYS use sans-serif fonts"
         matplotlib.rcParams['font.family'] = "sans-serif"
@@ -509,8 +509,10 @@ class Interpreter:
         plt.ylabel('Accuracy', fontsize=14)
         ax.text(0.85, chance_text_y, 'Chance', transform=ax.transAxes, fontsize=14,
                 verticalalignment='top', color='grey')
-        ax.text(0.22, .98, 'Stim', transform=ax.transAxes, fontsize=14,
-                verticalalignment='top', color='white')
+        if title:
+            plt.title(title,fontsize=14)
+        # ax.text(0.22, .98, 'Stim', transform=ax.transAxes, fontsize=14,
+        #         verticalalignment='top', color='white')
         
         self.savefig('acc'+subtitle,save=savefig)
         plt.show()
